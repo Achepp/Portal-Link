@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LinkKeeper Mobile - Bookmark Manager</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        window.addEventListener('load', function() {
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = {
+                    darkMode: 'class',
+                    theme: {
+                        extend: {
+                            fontFamily: {
+                                sans: ['Inter', 'sans-serif'],
+                                heading: ['Plus Jakarta Sans', 'sans-serif'],
+                            },
+                            colors: {
+                                dark: {
+                                    bg: '#05070A',
+                                    card: '#0D111C',
+                                    border: '#1E2638',
+                                    input: '#121826'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Layout Dasar Mobile Native */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            width: 100%;
+            background-color: #FDFDFE;
+        }
+
+        .dark body { background-color: #05070A; }
+
+        /* Safe Area Padding untuk HP modern */
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom, 1rem); }
+        .safe-pt { padding-top: env(safe-area-inset-top, 1rem); }
+
+        .animate-in {
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Animasi Aktif Navigasi */
+        .nav-item.active {
+            color: #6366f1;
+        }
+        .nav-item.active i {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 4px 6px rgba(99, 102, 241, 0.3));
+        }
+
+        .loader {
+            border: 2px solid rgba(99, 102, 241, 0.1);
+            border-top: 2px solid #6366f1;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Bottom Sheet AI */
+        #ai-chat-window {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(100%);
+        }
+        #ai-chat-window.active {
+            transform: translateY(0);
+        }
+
+        /* Shadow Navigasi Bawah Premium */
+        .nav-shadow {
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        .dark .nav-shadow {
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+    <!-- --- Layar Login --- -->
+    <div id="login-screen" class="fixed inset-0 z-[200] bg-white dark:bg-dark-bg flex items-center justify-center p-6 text-center">
+        <div class="w-full max-w-[380px] space-y-10 animate-in mx-auto">
+            <div class="space-y-4">
+                <div class="inline-flex w-16 h-16 bg-indigo-600 rounded-3xl items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                    <i data-lucide="shield-check" size="32" stroke-width="2.5"></i>
+                </div>
+                <h2 class="text-3xl font-black font-heading tracking-tight">LinkKeeper</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Manajemen tautan modern dalam satu genggaman.</p>
+            </div>
+
+            <form id="login-form" class="space-y-4 text-left">
+                <input required type="email" id="login-email" placeholder="Email" class="w-full px-5 py-4 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10">
+                <input required type="password" id="login-password" placeholder="Password" class="w-full px-5 py-4 bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10">
+                <div id="login-error" class="hidden text-red-500 text-xs font-bold text-center">Akses ditolak. Periksa kredensial.</div>
+                <button type="submit" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all">Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- --- Konten Utama (Struktur Mobile App) --- -->
+    <div id="app-content" class="hidden flex flex-col h-screen w-full">
+        
+        <!-- Header Tetap (Top Bar) -->
+        <header class="flex-none safe-pt bg-white/80 dark:bg-dark-bg/80 backdrop-blur-xl border-b border-slate-50 dark:border-dark-border px-5 py-4 space-y-4 z-40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                        <i data-lucide="bookmark" size="18" stroke-width="2.5"></i>
+                    </div>
+                    <h1 class="text-xl font-black font-heading tracking-tighter">LinkKeeper</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="app.toggleAIChat()" class="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                        <i data-lucide="sparkles" size="18"></i>
+                    </button>
+                    <button onclick="app.toggleDarkMode()" class="p-2 bg-slate-50 dark:bg-dark-input text-slate-400 rounded-xl">
+                        <i id="theme-icon" data-lucide="moon" size="18"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Area Search -->
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size="16"></i>
+                <input type="text" id="search-input" placeholder="Cari bookmark..." class="w-full pl-11 pr-4 py-3 bg-slate-100 dark:bg-dark-input border-transparent rounded-xl focus:bg-white dark:focus:bg-dark-card border focus:border-indigo-500 transition-all outline-none text-sm">
+            </div>
+
+            <!-- Filter Kategori Horizontal -->
+            <div id="category-filters" class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"></div>
+        </header>
+
+        <!-- Konten yang Bisa di-Scroll -->
+        <main class="flex-1 overflow-y-auto px-5 py-6">
+            <div class="flex justify-between items-center mb-6">
+                <p id="item-count" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Memuat...</p>
+                <div id="sync-status"></div>
+            </div>
+            
+            <!-- Grid Bookmark -->
+            <div id="links-container" class="grid grid-cols-1 gap-4"></div>
+            
+            <!-- Spacer bawah agar tidak tertutup navbar -->
+            <div class="h-32"></div>
+        </main>
+
+        <!-- Navigasi Bawah Fixed (Sticky Footer) -->
+        <nav class="flex-none nav-shadow bg-white/95 dark:bg-dark-card/95 backdrop-blur-xl border-t border-slate-50 dark:border-dark-border px-8 pt-3 pb-safe-area z-50">
+            <div class="flex justify-between items-center max-w-md mx-auto">
+                <button onclick="app.setActiveTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center gap-1 text-slate-400 transition-all">
+                    <i data-lucide="layout-grid" size="22"></i>
+                    <span class="text-[10px] font-bold">Utama</span>
+                </button>
+                
+                <button onclick="app.setActiveTab('favorites')" id="nav-favorites" class="nav-item flex flex-col items-center gap-1 text-slate-400 transition-all">
+                    <i data-lucide="star" size="22"></i>
+                    <span class="text-[10px] font-bold">Favorit</span>
+                </button>
+
+                <!-- Tombol Action Utama (FAB Style) -->
+                <button onclick="app.openModal()" class="w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-500/40 flex items-center justify-center -translate-y-6 transition-transform active:scale-90 border-4 border-[#FDFDFE] dark:border-dark-bg">
+                    <i data-lucide="plus" size="28" stroke-width="3"></i>
+                </button>
+
+                <button onclick="app.setActiveTab('history')" id="nav-history" class="nav-item flex flex-col items-center gap-1 text-slate-400 transition-all">
+                    <i data-lucide="clock" size="22"></i>
+                    <span class="text-[10px] font-bold">Baru</span>
+                </button>
+
+                <button onclick="app.logout()" class="flex flex-col items-center gap-1 text-slate-300 hover:text-red-500 transition-all">
+                    <i data-lucide="log-out" size="22"></i>
+                    <span class="text-[10px] font-bold">Keluar</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Modals & AI Chat (Tetap berfungsi sama) -->
+    <div id="add-modal" class="hidden fixed inset-0 z-[210] flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="app.closeModal()"></div>
+        <div class="relative w-full max-w-lg bg-white dark:bg-dark-card rounded-t-[32px] p-8 space-y-6 animate-in safe-pb">
+            <h3 class="text-xl font-black font-heading text-left">Bookmark Baru</h3>
+            <form id="add-link-form" class="space-y-6 text-left">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">URL Website</label>
+                    <div class="flex gap-2">
+                        <input required type="url" id="modal-url" placeholder="https://..." class="flex-1 px-5 py-4 bg-slate-50 dark:bg-dark-input rounded-2xl outline-none border border-transparent focus:border-indigo-500">
+                        <button type="button" onclick="app.suggestCategory()" id="ai-suggest-btn" class="px-4 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl"><i data-lucide="sparkles" size="20"></i></button>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Judul</label>
+                    <input type="text" id="modal-title" placeholder="Nama link" class="w-full px-5 py-4 bg-slate-50 dark:bg-dark-input rounded-2xl outline-none border border-transparent focus:border-indigo-500">
+                </div>
+                <div id="modal-category-options" class="grid grid-cols-2 gap-2"></div>
+                <button type="submit" id="submit-btn" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black shadow-lg">Simpan Bookmark</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- AI Chat Bottom Sheet -->
+    <div id="ai-chat-window" class="fixed inset-x-0 bottom-0 top-1/4 z-[150] bg-white dark:bg-dark-card rounded-t-[40px] shadow-2xl flex flex-col overflow-hidden border-t border-slate-50 dark:border-dark-border">
+        <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mt-4" onclick="app.toggleAIChat()"></div>
+        <div class="p-6 flex justify-between items-center border-b border-slate-50 dark:border-dark-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white"><i data-lucide="sparkles" size="20"></i></div>
+                <p class="font-black">✨ AI Assistant</p>
+            </div>
+            <button onclick="app.toggleAIChat()" class="p-2 text-slate-400"><i data-lucide="x" size="20"></i></button>
+        </div>
+        <div id="ai-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50 dark:bg-dark-bg/20"></div>
+        <form id="ai-chat-form" class="p-6 bg-white dark:bg-dark-card border-t border-slate-50 dark:border-dark-border safe-pb flex gap-2">
+            <input type="text" id="ai-input" placeholder="Tanya Ahmad..." class="flex-1 px-5 py-4 bg-slate-50 dark:bg-dark-input rounded-2xl outline-none">
+            <button type="submit" class="p-4 bg-indigo-600 text-white rounded-2xl"><i data-lucide="send" size="20"></i></button>
+        </form>
+    </div>
+
+    <!-- AI Info Modal -->
+    <div id="ai-info-modal" class="hidden fixed inset-0 z-[220] flex items-center justify-center px-6">
+        <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="app.closeAIInfo()"></div>
+        <div class="relative w-full max-w-sm bg-white dark:bg-dark-card rounded-[40px] p-8 animate-in text-center space-y-6">
+            <div class="w-16 h-16 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-xl"><i data-lucide="sparkles" size="32"></i></div>
+            <h3 id="ai-info-title" class="text-xl font-black">✨ AI Summary</h3>
+            <p id="ai-info-content" class="text-sm text-slate-500 leading-relaxed text-left">...</p>
+            <button onclick="app.closeAIInfo()" class="w-full py-4 bg-slate-100 dark:bg-dark-input rounded-2xl font-bold">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORIES = ['Semua', 'Kerja', 'Kuliah', 'Hiburan', 'Tools', 'Referensi'];
+        const apiKey = ""; // Runtime key
+
+        class LinkKeeperApp {
+            constructor() {
+                this.apiUrl = "https://script.google.com/macros/s/AKfycbz7aZgQRoQun52b2v9X3UdofT22M8MozlItbhOk69Sp-rI5f2gI-WswrV8Ovxt5d9zO/exec";
+                this.links = [];
+                this.activeTab = 'dashboard';
+                this.selectedCategory = 'Semua';
+                this.selectedModalCategory = 'Kerja';
+                this.searchQuery = '';
+                this.isLoggedIn = localStorage.getItem('lk_isLoggedIn') === 'true';
+                this.isDarkMode = localStorage.getItem('lk_theme') === 'dark';
+                this.isAIChatOpen = false;
+                this.init();
+            }
+
+            async init() {
+                if (this.isDarkMode) document.documentElement.classList.add('dark');
+                if (this.isLoggedIn) {
+                    this.showMainApp();
+                    await this.fetchLinks();
+                } else {
+                    this.showLoginScreen();
+                }
+                this.setupEventListeners();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            async fetchLinks() {
+                this.setSyncStatus(true);
+                try {
+                    const res = await fetch(this.apiUrl);
+                    const data = await res.json();
+                    this.links = Array.isArray(data) ? data.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0)) : [];
+                    this.renderLinks();
+                } catch (e) { console.error(e); }
+                finally { this.setSyncStatus(false); }
+            }
+
+            setSyncStatus(isLoading) {
+                const el = document.getElementById('sync-status');
+                if (!el) return;
+                el.innerHTML = isLoading ? '<div class="loader"></div>' : '<i data-lucide="check" class="text-green-500" size="14"></i>';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+
+            setupEventListeners() {
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const pass = document.getElementById('login-password').value;
+                    if (email === 'ahmadasepsuhendi@gmail.com' && pass === 'admin') {
+                        this.isLoggedIn = true;
+                        localStorage.setItem('lk_isLoggedIn', 'true');
+                        this.showMainApp();
+                        this.fetchLinks();
+                    } else {
+                        document.getElementById('login-error').classList.remove('hidden');
+                    }
+                });
+                document.getElementById('search-input').addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value.toLowerCase();
+                    this.renderLinks();
+                });
+                document.getElementById('add-link-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleAddLink();
+                });
+                document.getElementById('ai-chat-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.handleAIChat();
+                });
+            }
+
+            renderLinks() {
+                const container = document.getElementById('links-container');
+                if (!container) return;
+
+                const filtered = this.links.filter(l => {
+                    const matchesSearch = (l.title || '').toLowerCase().includes(this.searchQuery);
+                    const matchesCat = this.selectedCategory === 'Semua' || l.category === this.selectedCategory;
+                    if (this.activeTab === 'favorites') return l.isFavorite && matchesSearch;
+                    return matchesSearch && matchesCat;
+                });
+
+                document.getElementById('item-count').innerText = `${filtered.length} bookmarks tersimpan`;
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="py-20 text-center opacity-30"><i data-lucide="folder-open" class="mx-auto mb-4" size="48"></i><p class="font-bold">Kosong</p></div>`;
+                    lucide.createIcons();
+                    return;
+                }
+
+                container.innerHTML = filtered.map(link => {
+                    let domain = 'link'; try { domain = new URL(link.url).hostname; } catch(e){}
+                    const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                    return `
+                        <div class="bg-white dark:bg-dark-card p-4 rounded-2xl border border-slate-50 dark:border-dark-border shadow-sm flex items-center gap-4 animate-in">
+                            <div class="w-12 h-12 bg-slate-50 dark:bg-dark-input rounded-xl flex items-center justify-center flex-shrink-0">
+                                <img src="${favicon}" class="w-7 h-7 object-contain" onerror="this.src='https://lucide.dev/api/icons/link'">
+                            </div>
+                            <div class="flex-1 min-w-0 text-left">
+                                <span class="text-[9px] font-bold uppercase text-indigo-500">${link.category}</span>
+                                <h3 class="font-bold text-sm truncate leading-tight">${link.title}</h3>
+                                <div class="flex gap-4 mt-2">
+                                    <a href="${link.url}" target="_blank" class="text-[11px] font-black text-indigo-600 dark:text-indigo-400">Buka</a>
+                                    <button onclick="app.summarizeLink('${link.id}')" class="text-[11px] font-black text-slate-400">✨ Info</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-3">
+                                <button onclick="app.toggleFavorite('${link.id}')" class="${link.isFavorite ? 'text-yellow-500' : 'text-slate-200'}">
+                                    <i data-lucide="star" size="18" fill="${link.isFavorite ? 'currentColor' : 'none'}"></i>
+                                </button>
+                                <button onclick="app.deleteLink('${link.id}')" class="text-slate-100 hover:text-red-500"><i data-lucide="trash-2" size="18"></i></button>
+                            </div>
+                        </div>`;
+                }).join('');
+                lucide.createIcons();
+            }
+
+            setActiveTab(tab) {
+                this.activeTab = tab;
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const activeEl = document.getElementById(`nav-${tab}`);
+                if (activeEl) activeEl.classList.add('active');
+                this.renderUI();
+            }
+
+            renderUI() {
+                this.renderCategoryFilters();
+                this.renderLinks();
+            }
+
+            renderCategoryFilters() {
+                const container = document.getElementById('category-filters');
+                if (!container) return;
+                container.innerHTML = CATEGORIES.map(cat => `
+                    <button onclick="app.setCategory('${cat}')" class="px-5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all border ${this.selectedCategory === cat ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-dark-card text-slate-500 border-slate-100 dark:border-dark-border'}">${cat}</button>
+                `).join('');
+            }
+
+            setCategory(cat) { this.selectedCategory = cat; this.renderUI(); }
+            showLoginScreen() { document.getElementById('login-screen').classList.remove('hidden'); document.getElementById('app-content').classList.add('hidden'); }
+            showMainApp() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app-content').classList.remove('hidden'); this.setActiveTab('dashboard'); }
+            toggleDarkMode() { this.isDarkMode = !this.isDarkMode; document.documentElement.classList.toggle('dark', this.isDarkMode); localStorage.setItem('lk_theme', this.isDarkMode ? 'dark' : 'light'); document.getElementById('theme-icon').setAttribute('data-lucide', this.isDarkMode ? 'sun' : 'moon'); lucide.createIcons(); }
+            toggleAIChat() { this.isAIChatOpen = !this.isAIChatOpen; document.getElementById('ai-chat-window').classList.toggle('active', this.isAIChatOpen); }
+            openModal() { document.getElementById('add-modal').classList.remove('hidden'); this.renderModalCategories(); }
+            closeModal() { document.getElementById('add-modal').classList.add('hidden'); }
+            logout() { localStorage.removeItem('lk_isLoggedIn'); location.reload(); }
+            openAIInfo(t, c) { document.getElementById('ai-info-title').innerText = t; document.getElementById('ai-info-content').innerText = c; document.getElementById('ai-info-modal').classList.remove('hidden'); }
+            closeAIInfo() { document.getElementById('ai-info-modal').classList.add('hidden'); }
+
+            async handleAddLink() {
+                const url = document.getElementById('modal-url').value;
+                const title = document.getElementById('modal-title').value;
+                const btn = document.getElementById('submit-btn');
+                btn.disabled = true; btn.innerText = "...";
+                const newLink = { id: Date.now().toString(), title: title || new URL(url).hostname, url, category: this.selectedModalCategory, isFavorite: false, createdAt: Date.now() };
+                try { await fetch(this.apiUrl, { method: "POST", body: JSON.stringify({ action: "add", data: newLink }) }); this.links.unshift(newLink); this.closeModal(); this.renderLinks(); } catch(e){ alert("Gagal."); } finally { btn.disabled = false; btn.innerText = "Simpan"; }
+            }
+
+            async toggleFavorite(id) { this.links = this.links.map(l => l.id == id ? {...l, isFavorite: !l.isFavorite} : l); this.renderLinks(); await fetch(this.apiUrl, { method: "POST", body: JSON.stringify({ action: "toggleFavorite", id }) }); }
+            async deleteLink(id) { if(!confirm("Hapus?")) return; this.links = this.links.filter(l => l.id != id); this.renderLinks(); await fetch(this.apiUrl, { method: "POST", body: JSON.stringify({ action: "delete", id }) }); }
+            
+            async callGemini(prompt, systemPrompt = "Asisten LinkKeeper ringkas.") {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                try { const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{parts:[{text:prompt}]}], systemInstruction: {parts:[{text:systemPrompt}]}}) }); const data = await res.json(); return data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf."; } catch(e){ return "Error."; }
+            }
+
+            async summarizeLink(id) { const link = this.links.find(l => l.id == id); this.openAIInfo("✨ Info AI", "Menganalisis..."); const res = await this.callGemini(`Ringkas link ini: ${link.title} (${link.url})`); document.getElementById('ai-info-content').innerText = res; }
+            async suggestCategory() { const url = document.getElementById('modal-url').value; if(!url) return; const res = await this.callGemini(`Kategori [Kerja, Kuliah, Hiburan, Tools, Referensi] untuk ${url}. Balas 1 kata.`); const matched = CATEGORIES.find(c => res.includes(c)); if(matched) { this.selectedModalCategory = matched; this.renderModalCategories(); } }
+            async handleAIChat() { const input = document.getElementById('ai-input'); const text = input.value; if(!text) return; const box = document.getElementById('ai-messages'); box.innerHTML += `<div class="bg-indigo-600 text-white p-4 rounded-2xl self-end text-right ml-10 text-sm">${text}</div>`; input.value = ""; box.scrollTop = box.scrollHeight; const res = await this.callGemini(text, `Data Ahmad: ${JSON.stringify(this.links.map(l=>l.title))}`); box.innerHTML += `<div class="bg-white dark:bg-dark-input p-4 rounded-2xl mr-10 text-sm border border-slate-50 dark:border-dark-border text-left">${res}</div>`; box.scrollTop = box.scrollHeight; }
+            renderModalCategories() { const container = document.getElementById('modal-category-options'); container.innerHTML = CATEGORIES.filter(c => c !== 'Semua').map(cat => `
+                <button type="button" onclick="app.selectedModalCategory = '${cat}'; app.renderModalCategories()" class="px-4 py-3 rounded-xl text-xs font-bold border ${this.selectedModalCategory === cat ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 dark:bg-dark-input text-slate-400 border-transparent'}">${cat}</button>
+            `).join(''); }
+        }
+
+        window.app = new LinkKeeperApp();
+    </script>
+</body>
+</html>
