@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Surat Jalan - PT INTI NOMIKA</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --secondary-light: #1e293b;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+        --light: #f8fafc;
+        --dark: #0f172a;
+        --gray: #64748b;
+        --sidebar-width: 260px;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #f1f5f9;
+        color: #334155;
+        overflow-x: hidden;
+    }
+
+    /* --- Login Screen --- */
+    #login-screen {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            background: white;
+            padding: 2.5rem;
+        }
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* --- Application Layout --- */
+        #app-screen {
+            display: none;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar-brand {
+            padding: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-brand i { color: var(--primary); }
+        .sidebar-menu {
+            padding: 1rem 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .sidebar-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: var(--secondary-light);
+            color: white;
+            border-left-color: var(--primary);
+        }
+        .sidebar-item i { width: 20px; text-align: center; }
+        
+        /* Main Content */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s;
+        }
+        
+        /* Navbar */
+        .top-navbar {
+            background: white;
+            height: 70px;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+        .nav-user .avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+        .page-view { display: none; animation: fadeIn 0.3s ease; }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI Components */
+        .card-custom {
+            background: white;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-stat:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .card-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: white;
+        }
+        
+        .table-responsive { border-radius: 8px; overflow: hidden; }
+        .table { margin-bottom: 0; }
+        .table thead th {
+            background-color: var(--light);
+            color: var(--gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 1rem;
+        }
+        .table tbody td { padding: 1rem; vertical-align: middle; border-bottom: 1px solid #f1f5f9; font-size: 0.875rem; }
+        .table tbody tr:hover { background-color: #f8fafc; }
+
+        /* Badges */
+        .badge { padding: 0.5em 0.75em; font-weight: 500; border-radius: 6px; font-size: 0.75rem; }
+        .bg-draft { background-color: #e2e8f0; color: #475569; }
+        .bg-submitted { background-color: #dbeafe; color: #1e40af; }
+        .bg-approved { background-color: #dcfce7; color: #166534; }
+        .bg-rejected { background-color: #fee2e2; color: #991b1b; }
+        .bg-delivery { background-color: #fef3c7; color: #92400e; }
+        .bg-received { background-color: var(--success); color: white; }
+        .bg-returned { background-color: var(--danger); color: white; }
+
+        /* Buttons */
+        .btn { font-weight: 500; border-radius: 8px; padding: 0.5rem 1rem; transition: all 0.2s; }
+        .btn-primary { background-color: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-dark); border-color: var(--primary-dark); }
+        .btn-action { padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 6px; }
+
+        /* Helpers */
+        .text-primary-custom { color: var(--primary); }
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); z-index: 2000;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
+            .mobile-toggle { display: block !important; }
+        }
+        .mobile-toggle { display: none; font-size: 1.5rem; cursor: pointer; color: var(--secondary); }
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div class="loader-overlay" id="global-loader">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <div class="mt-3 fw-medium">Memproses data...</div>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo"><i class="fas fa-box-open"></i></div>
+            <h4 class="text-center fw-bold mb-1">PT INTI NOMIKA</h4>
+            <p class="text-center text-muted mb-4">Portal Surat Jalan Pemasok</p>
+            
+            <form id="login-form" onsubmit="event.preventDefault();">
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+                        <input type="email" class="form-control border-start-0 ps-0 bg-light" id="login-email" required placeholder="Masukkan email">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-medium">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                        <input type="password" class="form-control border-start-0 ps-0 bg-light" id="login-password" required placeholder="Masukkan password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Login ke Portal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP SCREEN -->
+    <div id="app-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <i class="fas fa-building"></i> INTI NOMIKA
+            </div>
+            <div class="sidebar-menu" id="sidebar-menu">
+                <!-- Menu items injected via JS based on role -->
+            </div>
+            <div class="mt-auto p-3">
+                <div class="sidebar-item" onclick="app.logout()" style="border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <nav class="top-navbar">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-bars mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('show')"></i>
+                    <h5 class="mb-0 fw-bold d-none d-md-block" id="page-title">Dashboard</h5>
+                </div>
+                <div class="nav-user">
+                    <div class="text-end d-none d-md-block">
+                        <div class="fw-bold" id="user-name" style="font-size: 0.9rem;">Nama User</div>
+                        <div class="text-muted" id="user-role" style="font-size: 0.75rem;">Role</div>
+                    </div>
+                    <div class="avatar" id="user-initial">U</div>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                
+                <!-- VIEW: DASHBOARD -->
+                <div id="view-dashboard" class="page-view active">
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card-custom card-stat p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-bold">TOTAL SUPPLIER</div>
+                                        <h3 class="mb-0 fw-bold mt-1" id="stat-supplier">0</h3>
+                                    </div>
+                                    <div class="card-icon" style="background: var(--primary);"><i class="fas fa-users"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card-custom card-stat p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-bold">TOTAL SURAT JALAN</div>
+                                        <h3 class="mb-0 fw-bold mt-1" id="stat-sj">0</h3>
+                                    </div>
+                                    <div class="card-icon" style="background: var(--info);"><i class="fas fa-file-invoice"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card-custom card-stat p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-bold">MENUNGGU APPROVAL</div>
+                                        <h3 class="mb-0 fw-bold mt-1" id="stat-pending">0</h3>
+                                    </div>
+                                    <div class="card-icon" style="background: var(--warning);"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card-custom card-stat p-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="text-muted small fw-bold">BARANG DITERIMA</div>
+                                        <h3 class="mb-0 fw-bold mt-1" id="stat-received">0</h3>
+                                    </div>
+                                    <div class="card-icon" style="background: var(--success);"><i class="fas fa-check-circle"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 mb-4">
+                            <div class="card-custom p-4 h-100">
+                                <h6 class="fw-bold mb-4">Statistik Pengiriman 6 Bulan Terakhir</h6>
+                                <canvas id="barChart" height="100"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="card-custom p-4 h-100">
+                                <h6 class="fw-bold mb-4">Status Surat Jalan</h6>
+                                <canvas id="pieChart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: MASTER SUPPLIER -->
+                <div id="view-supplier" class="page-view">
+                    <div class="card-custom p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="w-50">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="search-supplier" placeholder="Cari supplier..." onkeyup="app.renderSuppliers()">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="app.openModalSupplier()"><i class="fas fa-plus me-2"></i>Tambah Supplier</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Kode</th>
+                                        <th>Nama Supplier</th>
+                                        <th>Kontak</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-supplier"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: MASTER BARANG -->
+                <div id="view-barang" class="page-view">
+                    <div class="card-custom p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="w-50">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0 ps-0" id="search-barang" placeholder="Cari barang..." onkeyup="app.renderBarang()">
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="app.openModalBarang()"><i class="fas fa-plus me-2"></i>Tambah Barang</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Kode</th>
+                                        <th>Nama Barang</th>
+                                        <th>Kategori</th>
+                                        <th>Satuan</th>
+                                        <th>Stok</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-barang"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: PURCHASE ORDER -->
+                <div id="view-po" class="page-view">
+                    <div class="card-custom p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="fw-bold mb-0">Daftar Purchase Order Aktif</h6>
+                            <div class="w-25">
+                                <input type="text" class="form-control" id="search-po" placeholder="Cari No PO..." onkeyup="app.renderPO()">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No. PO</th>
+                                        <th>Tanggal</th>
+                                        <th>Supplier</th>
+                                        <th>Total Item</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-po"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: SURAT JALAN -->
+                <div id="view-suratjalan" class="page-view">
+                    <!-- List Mode -->
+                    <div id="sj-list-mode">
+                        <div class="card-custom p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="w-25">
+                                    <input type="text" class="form-control" id="search-sj" placeholder="Cari No SJ..." onkeyup="app.renderSJList()">
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="app.toggleSJMode('form')" id="btn-create-sj"><i class="fas fa-plus me-2"></i>Buat Surat Jalan</button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>No. Surat Jalan</th>
+                                            <th>Tanggal</th>
+                                            <th>No. PO</th>
+                                            <th>Supplier</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody-sj"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Mode -->
+                    <div id="sj-form-mode" style="display: none;">
+                        <div class="card-custom p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                                <h5 class="fw-bold mb-0">Form Pembuatan Surat Jalan</h5>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="app.toggleSJMode('list')"><i class="fas fa-arrow-left me-2"></i>Kembali</button>
+                            </div>
+                            
+                            <form id="form-create-sj" onsubmit="event.preventDefault();">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">No. Surat Jalan</label>
+                                        <input type="text" class="form-control bg-light" id="inp-sj-no" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Tanggal Pengiriman</label>
+                                        <input type="date" class="form-control" id="inp-sj-date" required>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Pilih Purchase Order</label>
+                                        <select class="form-select" id="inp-sj-po" required onchange="app.loadItemsFromPO()"></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Supplier</label>
+                                        <input type="text" class="form-control bg-light" id="inp-sj-supplier" readonly>
+                                        <input type="hidden" id="inp-sj-supplier-code">
+                                    </div>
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Nama Driver</label>
+                                        <input type="text" class="form-control" id="inp-sj-driver" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Nomor Kendaraan</label>
+                                        <input type="text" class="form-control" id="inp-sj-plate" required>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold mb-3 border-bottom pb-2">Detail Barang</h6>
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-bordered">
+                                        <thead class="bg-light">
+                                            <tr>
+                                                <th width="40%">Nama Barang</th>
+                                                <th width="20%">Satuan</th>
+                                                <th width="20%">Qty PO</th>
+                                                <th width="20%">Qty Kirim</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-sj-items">
+                                            <!-- Injected via JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="text-end mt-4">
+                                    <button type="button" class="btn btn-secondary me-2" onclick="app.toggleSJMode('list')">Batal</button>
+                                    <button type="submit" class="btn btn-success"><i class="fas fa-paper-plane me-2"></i>Submit Surat Jalan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: APPROVAL PURCHASING -->
+                <div id="view-approval" class="page-view">
+                    <div class="card-custom p-4">
+                        <h6 class="fw-bold mb-4">Menunggu Approval Purchasing</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No. Surat Jalan</th>
+                                        <th>Tanggal</th>
+                                        <th>Supplier</th>
+                                        <th>No. PO</th>
+                                        <th>Status</th>
+                                        <th class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-approval"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: PENERIMAAN BARANG -->
+                <div id="view-penerimaan" class="page-view">
+                    <div class="card-custom p-4">
+                        <h6 class="fw-bold mb-4">Penerimaan Barang (Warehouse)</h6>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No. Surat Jalan</th>
+                                        <th>Tgl Kirim</th>
+                                        <th>Supplier</th>
+                                        <th>Driver/Plat</th>
+                                        <th>Status</th>
+                                        <th class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-penerimaan"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW: LAPORAN -->
+                <div id="view-laporan" class="page-view">
+                    <div class="card-custom p-4 mb-4">
+                        <h6 class="fw-bold mb-3">Filter Laporan</h6>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small">Tgl Awal</label>
+                                <input type="date" class="form-control" id="filter-start">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small">Tgl Akhir</label>
+                                <input type="date" class="form-control" id="filter-end">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">Status</label>
+                                <select class="form-select" id="filter-status">
+                                    <option value="">Semua Status</option>
+                                    <option value="Submitted">Submitted</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Received">Received</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Returned">Returned</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-primary w-100" onclick="app.renderLaporan()"><i class="fas fa-filter"></i> Filter</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-custom p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">Hasil Laporan</h6>
+                            <div>
+                                <button type="button" class="btn btn-outline-danger btn-sm me-2" onclick="app.dummyExport('PDF')"><i class="fas fa-file-pdf"></i> PDF</button>
+                                <button type="button" class="btn btn-outline-success btn-sm me-2" onclick="app.dummyExport('Excel')"><i class="fas fa-file-excel"></i> Excel</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="app.dummyExport('Print')"><i class="fas fa-print"></i> Print</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>No. SJ</th>
+                                        <th>Tanggal</th>
+                                        <th>Supplier</th>
+                                        <th>No. PO</th>
+                                        <th>Total Item</th>
+                                        <th>Status Akhir</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-laporan"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL SUPPLIER -->
+    <div class="modal fade" id="modal-supplier" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="modal-supplier-title">Tambah Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-supplier" onsubmit="event.preventDefault();">
+                        <input type="hidden" id="sup-mode" value="add">
+                        <div class="mb-3">
+                            <label class="form-label">Kode Supplier</label>
+                            <input type="text" class="form-control" id="sup-code" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Supplier</label>
+                            <input type="text" class="form-control" id="sup-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alamat Lengkap</label>
+                            <textarea class="form-control" id="sup-address" rows="2" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Kontak (Telp)</label>
+                                <input type="text" class="form-control" id="sup-phone" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="sup-email" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="sup-status">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Nonaktif">Nonaktif</option>
+                            </select>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BARANG -->
+    <div class="modal fade" id="modal-barang" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="modal-barang-title">Tambah Barang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-barang" onsubmit="event.preventDefault();">
+                        <input type="hidden" id="brg-mode" value="add">
+                        <div class="mb-3">
+                            <label class="form-label">Kode Barang</label>
+                            <input type="text" class="form-control" id="brg-code" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nama Barang</label>
+                            <input type="text" class="form-control" id="brg-name" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Kategori</label>
+                                <select class="form-select" id="brg-category" required>
+                                    <option value="Raw Material">Raw Material</option>
+                                    <option value="Packaging">Packaging</option>
+                                    <option value="Sparepart">Sparepart</option>
+                                    <option value="Consumable">Consumable</option>
+                                </select>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Satuan</label>
+                                <select class="form-select" id="brg-unit" required>
+                                    <option value="KG">KG</option>
+                                    <option value="PCS">PCS</option>
+                                    <option value="LITER">LITER</option>
+                                    <option value="BOX">BOX</option>
+                                    <option value="METER">METER</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Stok Awal</label>
+                            <input type="number" class="form-control" id="brg-stock" value="0" required>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETAIL SURAT JALAN -->
+    <div class="modal fade" id="modal-detail-sj" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Detail Surat Jalan: <span id="det-sj-no" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1 text-muted small">Supplier</p>
+                            <h6 class="fw-bold" id="det-sj-supplier"></h6>
+                            <p class="mb-1 text-muted small mt-2">Nomor PO</p>
+                            <h6 class="fw-bold" id="det-sj-po"></h6>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1 text-muted small">Tanggal Kirim</p>
+                            <h6 class="fw-bold" id="det-sj-date"></h6>
+                            <p class="mb-1 text-muted small mt-2">Driver / Kendaraan</p>
+                            <h6 class="fw-bold"><span id="det-sj-driver"></span> / <span id="det-sj-plate"></span></h6>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
+                                    <th>Satuan</th>
+                                    <th class="text-center">Qty Kirim</th>
+                                </tr>
+                            </thead>
+                            <tbody id="det-sj-items"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Dynamic Action Area based on view -->
+                    <div id="det-action-area" class="mt-4 pt-3 border-top text-end" style="display: none;">
+                        <textarea class="form-control mb-3" id="det-notes" placeholder="Tambahkan catatan (Opsional)..."></textarea>
+                        <div id="det-action-buttons"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Application Logic -->
+    <script>
+        /**
+         * STATE MANAGEMENT & DUMMY DATABASE
+         */
+        const dummyDb = {
+            users: [
+                { email: 'admin@inti.com', password: '123456', role: 'Admin', name: 'Super Admin' },
+                { email: 'supplier@inti.com', password: '123456', role: 'Supplier', name: 'PT Sumber Berkah', supCode: 'SUP-001' },
+                { email: 'purchasing@inti.com', password: '123456', role: 'Purchasing', name: 'Budi Purchasing' },
+                { email: 'warehouse@inti.com', password: '123456', role: 'Warehouse', name: 'Andi Gudang' }
+            ],
+            suppliers: [],
+            items: [],
+            pos: [],
+            suratJalans: []
+        };
+
+        let state = {
+            currentUser: null,
+            currentView: 'dashboard',
+            modals: {}
+        };
+
+        let charts = { bar: null, pie: null };
+
+        /**
+         * DATA GENERATOR
+         */
+        function generateDummyData() {
+            // Generate Suppliers
+            for(let i=1; i<=10; i++) {
+                dummyDb.suppliers.push({
+                    code: `SUP-${i.toString().padStart(3, '0')}`,
+                    name: `PT Mitra Makmur ${i}`,
+                    address: `Kawasan Industri Blok ${String.fromCharCode(64+i)} No. ${i}`,
+                    phone: `0812345600${i}`,
+                    email: `sales@mitramakmur${i}.com`,
+                    status: i % 8 === 0 ? 'Nonaktif' : 'Aktif'
+                });
+            }
+
+            // Generate Items
+            const categories = ['Raw Material', 'Packaging', 'Sparepart', 'Consumable'];
+            const units = ['KG', 'PCS', 'BOX', 'LITER'];
+            for(let i=1; i<=20; i++) {
+                dummyDb.items.push({
+                    code: `BRG-${i.toString().padStart(4, '0')}`,
+                    name: `Material Produksi ${i}`,
+                    category: categories[i%4],
+                    unit: units[i%4],
+                    stock: Math.floor(Math.random() * 1000) + 100
+                });
+            }
+
+            // Generate POs
+            const statuses = ['Open', 'Partial', 'Completed'];
+            for(let i=1; i<=15; i++) {
+                let sup = dummyDb.suppliers[Math.floor(Math.random() * 8)]; // Only active ones mostly
+                let itemsCount = Math.floor(Math.random() * 5) + 1;
+                let poItems = [];
+                for(let j=0; j<itemsCount; j++) {
+                    let item = dummyDb.items[Math.floor(Math.random() * dummyDb.items.length)];
+                    poItems.push({ code: item.code, name: item.name, unit: item.unit, qty: Math.floor(Math.random() * 100) + 10 });
+                }
+
+                dummyDb.pos.push({
+                    po_number: `PO/2026/06/${i.toString().padStart(3, '0')}`,
+                    date: `2026-06-${Math.floor(Math.random() * 10) + 1}`,
+                    supplier_code: sup.code,
+                    supplier_name: sup.name,
+                    items: poItems,
+                    total_qty: poItems.reduce((sum, it) => sum + it.qty, 0),
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+
+            // Generate Surat Jalan
+            const sjStatuses = ['Submitted', 'Approved', 'Rejected', 'In Delivery', 'Received', 'Returned'];
+            for(let i=1; i<=20; i++) {
+                let po = dummyDb.pos[Math.floor(Math.random() * dummyDb.pos.length)];
+                let stat = sjStatuses[Math.floor(Math.random() * sjStatuses.length)];
+                
+                // create partial/full items based on PO
+                let sjItems = po.items.map(it => ({
+                    code: it.code, name: it.name, unit: it.unit, 
+                    qty_po: it.qty, 
+                    qty_kirim: Math.floor(it.qty * (Math.random() * 0.5 + 0.5)) // 50-100%
+                }));
+
+                dummyDb.suratJalans.push({
+                    sj_number: `SJ/INTI/${i.toString().padStart(4, '0')}`,
+                    date: `2026-06-${Math.floor(Math.random() * 15) + 5}`,
+                    po_number: po.po_number,
+                    supplier_code: po.supplier_code,
+                    supplier_name: po.supplier_name,
+                    driver: `Driver ${i}`,
+                    plate: `B ${1000 + i} XYZ`,
+                    items: sjItems,
+                    status: stat,
+                    notes: stat === 'Rejected' ? 'Barang tidak sesuai spesifikasi' : ''
+                });
+            }
+        }
+
+        /**
+         * CORE APP LOGIC
+         */
+        const app = {
+            init() {
+                generateDummyData();
+                this.bindEvents();
+                
+                // Initialize Modals
+                state.modals.supplier = new bootstrap.Modal(document.getElementById('modal-supplier'));
+                state.modals.barang = new bootstrap.Modal(document.getElementById('modal-barang'));
+                state.modals.detailSj = new bootstrap.Modal(document.getElementById('modal-detail-sj'));
+
+                // Set Today's date for forms
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('inp-sj-date').value = today;
+                document.getElementById('filter-start').value = `2026-06-01`;
+                document.getElementById('filter-end').value = today;
+            },
+
+            bindEvents() {
+                document.getElementById('login-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.login();
+                });
+                document.getElementById('form-supplier').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveSupplier();
+                });
+                document.getElementById('form-barang').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveBarang();
+                });
+                document.getElementById('form-create-sj').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.submitSJ();
+                });
+            },
+
+            // --- AUTHENTICATION ---
+            login() {
+                const email = document.getElementById('login-email').value;
+                const pass = document.getElementById('login-password').value;
+                
+                this.showLoader();
+                setTimeout(() => {
+                    const user = dummyDb.users.find(u => u.email === email && u.password === pass);
+                    this.hideLoader();
+                    
+                    if (user) {
+                        state.currentUser = user;
+                        document.getElementById('login-screen').style.display = 'none';
+                        document.getElementById('app-screen').style.display = 'block';
+                        
+                        document.getElementById('user-name').innerText = user.name;
+                        document.getElementById('user-role').innerText = user.role;
+                        document.getElementById('user-initial').innerText = user.name.charAt(0).toUpperCase();
+
+                        this.buildMenu();
+                        this.switchView('dashboard');
+                        
+                        Swal.fire({ icon: 'success', title: 'Login Berhasil', text: `Selamat datang, ${user.name}`, timer: 1500, showConfirmButton: false });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'Email atau password salah!' });
+                    }
+                }, 800);
+            },
+
+            logout() {
+                Swal.fire({
+                    title: 'Konfirmasi Logout',
+                    text: "Apakah Anda yakin ingin keluar?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#ef4444',
+                    confirmButtonText: 'Ya, Logout'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        state.currentUser = null;
+                        document.getElementById('login-screen').style.display = 'flex';
+                        document.getElementById('app-screen').style.display = 'none';
+                        document.getElementById('login-form').reset();
+                    }
+                });
+            },
+
+            // --- NAVIGATION ---
+            buildMenu() {
+                const role = state.currentUser.role;
+                const menuHtml = [];
+                
+                const addMenu = (id, icon, text) => {
+                    menuHtml.push(`<div class="sidebar-item" onclick="app.switchView('${id}')" id="menu-${id}">
+                        <i class="fas ${icon}"></i> ${text}
+                    </div>`);
+                };
+
+                addMenu('dashboard', 'fa-chart-pie', 'Dashboard');
+
+                if (role === 'Admin') {
+                    addMenu('supplier', 'fa-users', 'Master Supplier');
+                    addMenu('barang', 'fa-box', 'Master Barang');
+                    addMenu('po', 'fa-file-signature', 'Purchase Order');
+                    addMenu('suratjalan', 'fa-truck', 'Surat Jalan');
+                    addMenu('approval', 'fa-check-double', 'Approval PO');
+                    addMenu('penerimaan', 'fa-boxes', 'Penerimaan Barang');
+                    addMenu('laporan', 'fa-file-alt', 'Laporan');
+                } else if (role === 'Supplier') {
+                    addMenu('po', 'fa-file-signature', 'Purchase Order');
+                    addMenu('suratjalan', 'fa-truck', 'Kelola Surat Jalan');
+                } else if (role === 'Purchasing') {
+                    addMenu('po', 'fa-file-signature', 'Purchase Order');
+                    addMenu('approval', 'fa-check-double', 'Approval Surat Jalan');
+                    addMenu('laporan', 'fa-file-alt', 'Laporan');
+                } else if (role === 'Warehouse') {
+                    addMenu('barang', 'fa-box', 'Master Barang');
+                    addMenu('penerimaan', 'fa-boxes', 'Penerimaan Barang');
+                    addMenu('laporan', 'fa-file-alt', 'Laporan');
+                }
+
+                document.getElementById('sidebar-menu').innerHTML = menuHtml.join('');
+            },
+
+            switchView(viewId) {
+                // Update active state
+                document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+                
+                const viewEl = document.getElementById(`view-${viewId}`);
+                if(viewEl) viewEl.classList.add('active');
+                
+                const menuEl = document.getElementById(`menu-${viewId}`);
+                if(menuEl) menuEl.classList.add('active');
+
+                // Title Mapping
+                const titles = {
+                    'dashboard': 'Dashboard', 'supplier': 'Master Supplier', 'barang': 'Master Barang',
+                    'po': 'Purchase Order', 'suratjalan': 'Surat Jalan', 'approval': 'Approval Surat Jalan',
+                    'penerimaan': 'Penerimaan Barang Warehouse', 'laporan': 'Laporan Terpadu'
+                };
+                document.getElementById('page-title').innerText = titles[viewId] || 'Dashboard';
+                
+                // Close mobile sidebar
+                document.getElementById('sidebar').classList.remove('show');
+
+                // Trigger specific renders
+                if(viewId === 'dashboard') this.renderDashboard();
+                if(viewId === 'supplier') this.renderSuppliers();
+                if(viewId === 'barang') this.renderBarang();
+                if(viewId === 'po') this.renderPO();
+                if(viewId === 'suratjalan') { this.renderSJList(); this.toggleSJMode('list'); }
+                if(viewId === 'approval') this.renderApprovalList();
+                if(viewId === 'penerimaan') this.renderPenerimaanList();
+                if(viewId === 'laporan') this.renderLaporan();
+            },
+
+            // --- DASHBOARD ---
+            renderDashboard() {
+                // Filter data based on role
+                let sjs = dummyDb.suratJalans;
+                if(state.currentUser.role === 'Supplier') {
+                    sjs = sjs.filter(s => s.supplier_code === state.currentUser.supCode);
+                }
+
+                // Stats
+                document.getElementById('stat-supplier').innerText = dummyDb.suppliers.filter(s=>s.status==='Aktif').length;
+                document.getElementById('stat-sj').innerText = sjs.length;
+                document.getElementById('stat-pending').innerText = sjs.filter(s => s.status === 'Submitted').length;
+                document.getElementById('stat-received').innerText = sjs.filter(s => s.status === 'Received').length;
+
+                // Charts
+                this.initCharts(sjs);
+            },
+
+            initCharts(sjs) {
+                // Prepare Bar Chart Data (Dummy monthly)
+                const ctxBar = document.getElementById('barChart').getContext('2d');
+                if(charts.bar) charts.bar.destroy();
+                charts.bar = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                        datasets: [{
+                            label: 'Jumlah Pengiriman',
+                            data: [12, 19, 15, 22, 18, sjs.length],
+                            backgroundColor: '#2563eb',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                });
+
+                // Prepare Pie Chart Data
+                const statusCounts = { 'Submitted': 0, 'Approved': 0, 'In Delivery': 0, 'Received': 0, 'Rejected': 0, 'Returned': 0 };
+                sjs.forEach(s => { if(statusCounts[s.status] !== undefined) statusCounts[s.status]++; });
+                
+                const ctxPie = document.getElementById('pieChart').getContext('2d');
+                if(charts.pie) charts.pie.destroy();
+                charts.pie = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(statusCounts),
+                        datasets: [{
+                            data: Object.values(statusCounts),
+                            backgroundColor: ['#dbeafe', '#dcfce7', '#fef3c7', '#22c55e', '#fee2e2', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+                });
+            },
+
+            // --- MASTER SUPPLIER ---
+            renderSuppliers() {
+                const search = document.getElementById('search-supplier').value.toLowerCase();
+                const tbody = document.getElementById('tbody-supplier');
+                let html = '';
+
+                let filtered = dummyDb.suppliers.filter(s => s.name.toLowerCase().includes(search) || s.code.toLowerCase().includes(search));
+
+                filtered.forEach((s, idx) => {
+                    let badge = s.status === 'Aktif' ? 'bg-success' : 'bg-secondary';
+                    html += `<tr>
+                        <td class="fw-medium">${s.code}</td>
+                        <td>${s.name}</td>
+                        <td>${s.phone}</td>
+                        <td>${s.email}</td>
+                        <td><span class="badge ${badge}">${s.status}</span></td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-action" onclick="app.editSupplier(${idx})"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-action" onclick="app.deleteData('suppliers', ${idx}, 'renderSuppliers')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted">Data tidak ditemukan</td></tr>`;
+            },
+            
+            openModalSupplier() {
+                document.getElementById('form-supplier').reset();
+                document.getElementById('sup-mode').value = 'add';
+                document.getElementById('sup-code').value = `SUP-${(dummyDb.suppliers.length + 1).toString().padStart(3, '0')}`;
+                document.getElementById('modal-supplier-title').innerText = 'Tambah Supplier Baru';
+                state.modals.supplier.show();
+            },
+
+            editSupplier(index) {
+                const s = dummyDb.suppliers[index];
+                document.getElementById('sup-mode').value = index; // store index as mode
+                document.getElementById('sup-code').value = s.code;
+                document.getElementById('sup-name').value = s.name;
+                document.getElementById('sup-address').value = s.address;
+                document.getElementById('sup-phone').value = s.phone;
+                document.getElementById('sup-email').value = s.email;
+                document.getElementById('sup-status').value = s.status;
+                document.getElementById('modal-supplier-title').innerText = 'Edit Supplier';
+                state.modals.supplier.show();
+            },
+
+            saveSupplier() {
+                const mode = document.getElementById('sup-mode').value;
+                const data = {
+                    code: document.getElementById('sup-code').value,
+                    name: document.getElementById('sup-name').value,
+                    address: document.getElementById('sup-address').value,
+                    phone: document.getElementById('sup-phone').value,
+                    email: document.getElementById('sup-email').value,
+                    status: document.getElementById('sup-status').value
+                };
+
+                if(mode === 'add') {
+                    dummyDb.suppliers.push(data);
+                    this.notifySuccess('Supplier berhasil ditambahkan');
+                } else {
+                    dummyDb.suppliers[parseInt(mode)] = data;
+                    this.notifySuccess('Supplier berhasil diperbarui');
+                }
+                
+                state.modals.supplier.hide();
+                this.renderSuppliers();
+            },
+
+            // --- MASTER BARANG ---
+            renderBarang() {
+                const search = document.getElementById('search-barang').value.toLowerCase();
+                const tbody = document.getElementById('tbody-barang');
+                let html = '';
+
+                let filtered = dummyDb.items.filter(s => s.name.toLowerCase().includes(search) || s.code.toLowerCase().includes(search));
+
+                filtered.forEach((b, idx) => {
+                    html += `<tr>
+                        <td class="fw-medium">${b.code}</td>
+                        <td>${b.name}</td>
+                        <td><span class="badge bg-light text-dark border">${b.category}</span></td>
+                        <td>${b.unit}</td>
+                        <td class="fw-bold ${b.stock < 100 ? 'text-danger' : 'text-success'}">${b.stock}</td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-primary btn-action" onclick="app.editBarang(${idx})"><i class="fas fa-edit"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger btn-action" onclick="app.deleteData('items', ${idx}, 'renderBarang')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted">Data tidak ditemukan</td></tr>`;
+            },
+
+            openModalBarang() {
+                document.getElementById('form-barang').reset();
+                document.getElementById('brg-mode').value = 'add';
+                document.getElementById('brg-code').value = `BRG-${(dummyDb.items.length + 1).toString().padStart(4, '0')}`;
+                document.getElementById('modal-barang-title').innerText = 'Tambah Barang Baru';
+                state.modals.barang.show();
+            },
+
+            editBarang(index) {
+                const b = dummyDb.items[index];
+                document.getElementById('brg-mode').value = index; 
+                document.getElementById('brg-code').value = b.code;
+                document.getElementById('brg-name').value = b.name;
+                document.getElementById('brg-category').value = b.category;
+                document.getElementById('brg-unit').value = b.unit;
+                document.getElementById('brg-stock').value = b.stock;
+                document.getElementById('modal-barang-title').innerText = 'Edit Barang';
+                state.modals.barang.show();
+            },
+
+            saveBarang() {
+                const mode = document.getElementById('brg-mode').value;
+                const data = {
+                    code: document.getElementById('brg-code').value,
+                    name: document.getElementById('brg-name').value,
+                    category: document.getElementById('brg-category').value,
+                    unit: document.getElementById('brg-unit').value,
+                    stock: parseInt(document.getElementById('brg-stock').value)
+                };
+
+                if(mode === 'add') {
+                    dummyDb.items.push(data);
+                    this.notifySuccess('Barang berhasil ditambahkan');
+                } else {
+                    dummyDb.items[parseInt(mode)] = data;
+                    this.notifySuccess('Barang berhasil diperbarui');
+                }
+                
+                state.modals.barang.hide();
+                this.renderBarang();
+            },
+
+            // --- PURCHASE ORDER ---
+            renderPO() {
+                const search = document.getElementById('search-po').value.toLowerCase();
+                const tbody = document.getElementById('tbody-po');
+                let html = '';
+
+                let pos = dummyDb.pos;
+                if(state.currentUser.role === 'Supplier') {
+                    pos = pos.filter(p => p.supplier_code === state.currentUser.supCode);
+                }
+
+                let filtered = pos.filter(p => p.po_number.toLowerCase().includes(search));
+
+                filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(p => {
+                    let badge = p.status === 'Completed' ? 'bg-success' : (p.status === 'Partial' ? 'bg-warning' : 'bg-primary');
+                    html += `<tr>
+                        <td class="fw-bold text-primary-custom">${p.po_number}</td>
+                        <td>${p.date}</td>
+                        <td>${p.supplier_name}</td>
+                        <td>${p.total_qty} Unit</td>
+                        <td><span class="badge ${badge}">${p.status}</span></td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-light border btn-action" onclick="app.viewDetailPO('${p.po_number}')"><i class="fas fa-eye"></i> Detail</button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada PO tersedia</td></tr>`;
+            },
+            
+            viewDetailPO(poNum) {
+                // In a real app, this would open a modal with PO Items.
+                // Keeping it simple with SweetAlert to save lines.
+                const po = dummyDb.pos.find(p => p.po_number === poNum);
+                let html = `<table class='table table-sm text-start mt-3'><tr><th>Item</th><th>Qty</th></tr>`;
+                po.items.forEach(i => html += `<tr><td>${i.name}</td><td>${i.qty} ${i.unit}</td></tr>`);
+                html += `</table>`;
+                
+                Swal.fire({
+                    title: `Detail PO: ${poNum}`,
+                    html: html,
+                    width: 600,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#2563eb'
+                });
+            },
+
+            // --- SURAT JALAN ---
+            getBadgeClass(status) {
+                const map = {
+                    'Draft': 'bg-draft', 'Submitted': 'bg-submitted', 'Approved': 'bg-approved',
+                    'Rejected': 'bg-rejected', 'In Delivery': 'bg-delivery', 'Received': 'bg-received', 'Returned': 'bg-returned'
+                };
+                return map[status] || 'bg-secondary';
+            },
+
+            renderSJList() {
+                const search = document.getElementById('search-sj').value.toLowerCase();
+                const tbody = document.getElementById('tbody-sj');
+                
+                // Security based on role
+                let sjs = dummyDb.suratJalans;
+                if(state.currentUser.role === 'Supplier') {
+                    sjs = sjs.filter(s => s.supplier_code === state.currentUser.supCode);
+                }
+
+                let filtered = sjs.filter(s => s.sj_number.toLowerCase().includes(search));
+                let html = '';
+
+                filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(s => {
+                    html += `<tr>
+                        <td class="fw-bold">${s.sj_number}</td>
+                        <td>${s.date}</td>
+                        <td class="small text-muted">${s.po_number}</td>
+                        <td>${s.supplier_name}</td>
+                        <td><span class="badge ${this.getBadgeClass(s.status)}">${s.status}</span></td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-light border btn-action" onclick="app.viewDetailSJ('${s.sj_number}', 'view')"><i class="fas fa-eye"></i> View</button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada Surat Jalan</td></tr>`;
+
+                // Hide create button if not Supplier
+                document.getElementById('btn-create-sj').style.display = (state.currentUser.role === 'Supplier' || state.currentUser.role === 'Admin') ? 'block' : 'none';
+            },
+
+            toggleSJMode(mode) {
+                if(mode === 'form') {
+                    document.getElementById('sj-list-mode').style.display = 'none';
+                    document.getElementById('sj-form-mode').style.display = 'block';
+                    this.prepareSJForm();
+                } else {
+                    document.getElementById('sj-list-mode').style.display = 'block';
+                    document.getElementById('sj-form-mode').style.display = 'none';
+                    this.renderSJList();
+                }
+            },
+
+            prepareSJForm() {
+                document.getElementById('form-create-sj').reset();
+                document.getElementById('inp-sj-no').value = `SJ/INTI/${(dummyDb.suratJalans.length + 1).toString().padStart(4, '0')}`;
+                
+                const selPO = document.getElementById('inp-sj-po');
+                selPO.innerHTML = '<option value="">-- Pilih PO --</option>';
+                
+                let myPOs = dummyDb.pos.filter(p => p.status !== 'Completed');
+                if(state.currentUser.role === 'Supplier') {
+                    myPOs = myPOs.filter(p => p.supplier_code === state.currentUser.supCode);
+                    // Auto fill supplier
+                    const mySup = dummyDb.suppliers.find(s => s.code === state.currentUser.supCode);
+                    if(mySup) {
+                        document.getElementById('inp-sj-supplier').value = mySup.name;
+                        document.getElementById('inp-sj-supplier-code').value = mySup.code;
+                    }
+                }
+
+                myPOs.forEach(p => {
+                    selPO.innerHTML += `<option value="${p.po_number}">${p.po_number} - ${p.date}</option>`;
+                });
+                document.getElementById('tbody-sj-items').innerHTML = `<tr><td colspan="4" class="text-center text-muted">Pilih PO terlebih dahulu</td></tr>`;
+            },
+
+            loadItemsFromPO() {
+                const poNum = document.getElementById('inp-sj-po').value;
+                if(!poNum) { document.getElementById('tbody-sj-items').innerHTML = ''; return; }
+
+                const po = dummyDb.pos.find(p => p.po_number === poNum);
+                
+                // Auto fill supplier if Admin is creating on behalf
+                if(state.currentUser.role === 'Admin') {
+                    document.getElementById('inp-sj-supplier').value = po.supplier_name;
+                    document.getElementById('inp-sj-supplier-code').value = po.supplier_code;
+                }
+
+                let html = '';
+                po.items.forEach((item, idx) => {
+                    html += `<tr>
+                        <td><div class="fw-medium">${item.code}</div><div class="small text-muted">${item.name}</div></td>
+                        <td class="align-middle">${item.unit}</td>
+                        <td class="align-middle">${item.qty}</td>
+                        <td>
+                            <input type="number" class="form-control form-control-sm sj-item-qty" 
+                                data-code="${item.code}" data-name="${item.name}" data-unit="${item.unit}" data-poqty="${item.qty}"
+                                max="${item.qty}" min="0" value="${item.qty}" required>
+                        </td>
+                    </tr>`;
+                });
+                document.getElementById('tbody-sj-items').innerHTML = html;
+            },
+
+            submitSJ() {
+                const items = [];
+                document.querySelectorAll('.sj-item-qty').forEach(input => {
+                    let qtyKirim = parseInt(input.value);
+                    if(qtyKirim > 0) {
+                        items.push({
+                            code: input.dataset.code,
+                            name: input.dataset.name,
+                            unit: input.dataset.unit,
+                            qty_po: parseInt(input.dataset.poqty),
+                            qty_kirim: qtyKirim
+                        });
+                    }
+                });
+
+                if(items.length === 0) {
+                    Swal.fire('Error', 'Minimal 1 barang harus dikirim', 'error'); return;
+                }
+
+                const sjData = {
+                    sj_number: document.getElementById('inp-sj-no').value,
+                    date: document.getElementById('inp-sj-date').value,
+                    po_number: document.getElementById('inp-sj-po').value,
+                    supplier_code: document.getElementById('inp-sj-supplier-code').value,
+                    supplier_name: document.getElementById('inp-sj-supplier').value,
+                    driver: document.getElementById('inp-sj-driver').value,
+                    plate: document.getElementById('inp-sj-plate').value,
+                    status: 'Submitted',
+                    notes: '',
+                    items: items
+                };
+
+                this.showLoader();
+                setTimeout(() => {
+                    dummyDb.suratJalans.push(sjData);
+                    this.hideLoader();
+                    this.notifySuccess('Surat Jalan berhasil dibuat dan dikirim ke Purchasing');
+                    this.toggleSJMode('list');
+                }, 1000);
+            },
+
+            // --- REUSABLE MODAL DETAIL SJ ---
+            viewDetailSJ(sjNum, actionType = 'view') {
+                const sj = dummyDb.suratJalans.find(s => s.sj_number === sjNum);
+                
+                document.getElementById('det-sj-no').innerText = sj.sj_number;
+                document.getElementById('det-sj-supplier').innerText = sj.supplier_name;
+                document.getElementById('det-sj-po').innerText = sj.po_number;
+                document.getElementById('det-sj-date').innerText = sj.date;
+                document.getElementById('det-sj-driver').innerText = sj.driver;
+                document.getElementById('det-sj-plate').innerText = sj.plate;
+
+                let html = '';
+                sj.items.forEach(i => {
+                    html += `<tr>
+                        <td class="small fw-medium">${i.code}</td>
+                        <td>${i.name}</td>
+                        <td>${i.unit}</td>
+                        <td class="text-center fw-bold">${i.qty_kirim}</td>
+                    </tr>`;
+                });
+                document.getElementById('det-sj-items').innerHTML = html;
+
+                // Setup Actions inside Modal based on where it's opened from
+                const actionArea = document.getElementById('det-action-area');
+                const actionBtns = document.getElementById('det-action-buttons');
+                const noteInput = document.getElementById('det-notes');
+                noteInput.value = sj.notes || '';
+                noteInput.readOnly = false;
+
+                if (actionType === 'approve' && sj.status === 'Submitted') {
+                    actionArea.style.display = 'block';
+                    actionBtns.innerHTML = `
+                        <button type="button" class="btn btn-outline-danger me-2" onclick="app.processSJ('${sj.sj_number}', 'Rejected')"><i class="fas fa-times"></i> Reject</button>
+                        <button type="button" class="btn btn-success" onclick="app.processSJ('${sj.sj_number}', 'Approved')"><i class="fas fa-check"></i> Approve & Kirim</button>
+                    `;
+                } else if (actionType === 'receive' && (sj.status === 'Approved' || sj.status === 'In Delivery')) {
+                    actionArea.style.display = 'block';
+                    actionBtns.innerHTML = `
+                        <button type="button" class="btn btn-outline-danger me-2" onclick="app.processSJ('${sj.sj_number}', 'Returned')"><i class="fas fa-undo"></i> Retur / Tolak</button>
+                        <button type="button" class="btn btn-primary" onclick="app.processSJ('${sj.sj_number}', 'Received')"><i class="fas fa-box-open"></i> Terima Barang</button>
+                    `;
+                } else {
+                    // View mode
+                    if(sj.notes) {
+                        actionArea.style.display = 'block';
+                        noteInput.readOnly = true;
+                        actionBtns.innerHTML = `<span class="badge ${this.getBadgeClass(sj.status)} fs-6 px-3 py-2">Status Saat ini: ${sj.status}</span>`;
+                    } else {
+                        actionArea.style.display = 'none';
+                    }
+                }
+
+                state.modals.detailSj.show();
+            },
+
+            // Universal Process function for Approve/Reject/Receive/Return
+            processSJ(sjNum, newStatus) {
+                const note = document.getElementById('det-notes').value;
+                if((newStatus === 'Rejected' || newStatus === 'Returned') && note.trim() === '') {
+                    Swal.fire('Catatan Wajib', 'Mohon isi catatan alasan penolakan/retur.', 'warning');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: `Apakah Anda yakin menandai surat jalan ini sebagai ${newStatus}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Proses',
+                    confirmButtonColor: newStatus.includes('Reject') || newStatus.includes('Return') ? '#ef4444' : '#22c55e'
+                }).then((res) => {
+                    if(res.isConfirmed) {
+                        this.showLoader();
+                        setTimeout(() => {
+                            const idx = dummyDb.suratJalans.findIndex(s => s.sj_number === sjNum);
+                            dummyDb.suratJalans[idx].status = newStatus;
+                            dummyDb.suratJalans[idx].notes = note;
+                            
+                            // Update Stock if Received
+                            if(newStatus === 'Received') {
+                                dummyDb.suratJalans[idx].items.forEach(it => {
+                                    let dbItem = dummyDb.items.find(x => x.code === it.code);
+                                    if(dbItem) dbItem.stock += it.qty_kirim;
+                                });
+                            }
+
+                            this.hideLoader();
+                            state.modals.detailSj.hide();
+                            this.notifySuccess(`Status Surat Jalan berhasil diubah menjadi ${newStatus}`);
+                            
+                            // Refresh current view
+                            if(state.currentView === 'approval') this.renderApprovalList();
+                            if(state.currentView === 'penerimaan') this.renderPenerimaanList();
+                            
+                        }, 800);
+                    }
+                });
+            },
+
+            // --- APPROVAL PURCHASING ---
+            renderApprovalList() {
+                const tbody = document.getElementById('tbody-approval');
+                let sjs = dummyDb.suratJalans.filter(s => s.status === 'Submitted');
+                let html = '';
+
+                sjs.forEach(s => {
+                    html += `<tr>
+                        <td class="fw-bold">${s.sj_number}</td>
+                        <td>${s.date}</td>
+                        <td>${s.supplier_name}</td>
+                        <td class="small text-muted">${s.po_number}</td>
+                        <td><span class="badge ${this.getBadgeClass(s.status)}">${s.status}</span></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-primary btn-action" onclick="app.viewDetailSJ('${s.sj_number}', 'approve')">Review <i class="fas fa-arrow-right ms-1"></i></button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fas fa-check-circle text-success fs-4 mb-2 d-block"></i> Semua Surat Jalan sudah diproses</td></tr>`;
+            },
+
+            // --- PENERIMAAN WAREHOUSE ---
+            renderPenerimaanList() {
+                const tbody = document.getElementById('tbody-penerimaan');
+                let sjs = dummyDb.suratJalans.filter(s => s.status === 'Approved' || s.status === 'In Delivery');
+                let html = '';
+
+                sjs.forEach(s => {
+                    html += `<tr>
+                        <td class="fw-bold">${s.sj_number}</td>
+                        <td>${s.date}</td>
+                        <td>${s.supplier_name}</td>
+                        <td><div class="small fw-bold">${s.driver}</div><div class="small text-muted">${s.plate}</div></td>
+                        <td><span class="badge ${this.getBadgeClass(s.status)}">${s.status}</span></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-warning btn-action text-dark" onclick="app.viewDetailSJ('${s.sj_number}', 'receive')"><i class="fas fa-box"></i> Proses Terima</button>
+                        </td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fas fa-box-open text-secondary fs-4 mb-2 d-block"></i> Belum ada pengiriman barang</td></tr>`;
+            },
+
+            // --- LAPORAN ---
+            renderLaporan() {
+                const start = document.getElementById('filter-start').value;
+                const end = document.getElementById('filter-end').value;
+                const status = document.getElementById('filter-status').value;
+                
+                const tbody = document.getElementById('tbody-laporan');
+                
+                let sjs = dummyDb.suratJalans;
+                if(start && end) {
+                    sjs = sjs.filter(s => s.date >= start && s.date <= end);
+                }
+                if(status) {
+                    sjs = sjs.filter(s => s.status === status);
+                }
+
+                let html = '';
+                sjs.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(s => {
+                    let totalItem = s.items.reduce((sum, i) => sum + i.qty_kirim, 0);
+                    html += `<tr>
+                        <td class="fw-medium">${s.sj_number}</td>
+                        <td>${s.date}</td>
+                        <td>${s.supplier_name}</td>
+                        <td>${s.po_number}</td>
+                        <td class="text-center">${totalItem} Qty</td>
+                        <td><span class="badge ${this.getBadgeClass(s.status)}">${s.status}</span></td>
+                    </tr>`;
+                });
+                tbody.innerHTML = html || `<tr><td colspan="6" class="text-center py-4">Tidak ada data laporan pada periode ini</td></tr>`;
+            },
+
+            dummyExport(type) {
+                this.showLoader();
+                setTimeout(() => {
+                    this.hideLoader();
+                    Swal.fire('Export Berhasil', `Laporan berhasil di-generate dalam format ${type}. (Simulasi Dummy)`, 'success');
+                }, 1500);
+            },
+
+            // --- UTILS ---
+            deleteData(arrayName, index, renderFunc) {
+                Swal.fire({
+                    title: 'Hapus Data?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Ya, Hapus'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        dummyDb[arrayName].splice(index, 1);
+                        this.notifySuccess('Data berhasil dihapus');
+                        this[renderFunc]();
+                    }
+                });
+            },
+
+            notifySuccess(msg) {
+                Swal.fire({
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                    icon: 'success', title: msg,
+                    customClass: { popup: 'colored-toast' }
+                });
+            },
+
+            showLoader() { document.getElementById('global-loader').style.display = 'flex'; },
+            hideLoader() { document.getElementById('global-loader').style.display = 'none'; }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
